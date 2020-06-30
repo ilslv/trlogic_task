@@ -1,16 +1,17 @@
+mod endpoints;
+
 use actix_web::{HttpServer, App, web, HttpResponse, guard, Error, middleware};
 use actix_web::guard::Guard;
 use actix_web::dev::RequestHead;
-
-async fn multipart_handler() -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok().body("multipart"))
-}
+use crate::endpoints::multipart_handler;
 
 async fn json_handler() -> Result<HttpResponse, Error> {
+    //TODO: json handling
     Ok(HttpResponse::Ok().body("json"))
 }
 
 async fn index() -> HttpResponse {
+    //TODO: static html
     HttpResponse::Ok().body("index")
 }
 
@@ -28,6 +29,8 @@ impl Guard for MultipartHeaderGuard {
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_server=info,actix_web=info");
+
+    std::fs::create_dir_all("images").unwrap();
 
     HttpServer::new(|| {
         App::new().wrap(middleware::Logger::default())
