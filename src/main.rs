@@ -1,14 +1,9 @@
 mod endpoints;
 
-use actix_web::{HttpServer, App, web, HttpResponse, guard, Error, middleware};
+use actix_web::{HttpServer, App, web, HttpResponse, guard, middleware};
 use actix_web::guard::Guard;
 use actix_web::dev::RequestHead;
-use crate::endpoints::multipart_handler;
-
-async fn json_handler() -> Result<HttpResponse, Error> {
-    //TODO: json handling
-    Ok(HttpResponse::Ok().body("json"))
-}
+use crate::endpoints::{multipart_handler, json_handler};
 
 async fn index() -> HttpResponse {
     //TODO: static html
