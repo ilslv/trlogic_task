@@ -13,3 +13,6 @@ mime = "0.3.16"
 uuid = { version = "0.8", features = ["v4"]}
 serde = "1.0"
 reqwest = { version = "0.10", features = ["stream"] }
+regex = "1"
+base64 = "0.12"
+lazy_static = "1.4.0"
