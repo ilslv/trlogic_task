@@ -8,42 +8,11 @@ use mime::Mime;
 use regex::Regex;
 use lazy_static::lazy_static;
 
-fn uuid_filepath(file_extension: &str) -> String {
-    format!("images/{}.{}", Uuid::new_v4(), file_extension)
-}
-
-pub(crate) async fn multipart_handler(mut payload: Multipart) -> Result<HttpResponse> {
-    while let Ok(Some(mut field)) = payload.try_next().await {
-        let content_type = Field::content_type(&field);
-        if content_type.type_() == mime::IMAGE {
-            let filepath = uuid_filepath(content_type.subtype().as_str());
-
-            let mut file = web::block(|| std::fs::File::create(filepath))
-                .await?;
-
-            while let Some(Ok(chunk)) = field.next().await {
-                file = web::block(move || file.write_all(&chunk).map(|_| file)).await?;
-            }
-        }
-    }
-
-    Ok(HttpResponse::Ok().into())
-}
-
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub(crate) enum Image {
     Url(String),
     Base64(String),
-}
-
-fn get_mime(resp: &reqwest::Response) -> Option<Mime> {
-    let content_type = resp
-        .headers()
-        .get("content-type")?
-        .to_str().ok()?;
-
-    content_type.parse::<Mime>().ok()
 }
 
 struct DataURL {
@@ -66,6 +35,40 @@ fn parse_data_url(data_url: &str) -> Option<DataURL> {
     })
 }
 
+fn get_mime(resp: &reqwest::Response) -> Option<Mime> {
+    let content_type = resp
+        .headers()
+        .get("content-type")?
+        .to_str().ok()?;
+
+    content_type.parse::<Mime>().ok()
+}
+
+fn uuid_filepath(file_extension: &str) -> String {
+    format!("images/{}.{}", Uuid::new_v4(), file_extension)
+}
+
+pub(crate) async fn multipart_handler(mut payload: Multipart) -> Result<HttpResponse> {
+    while let Ok(Some(mut field)) = payload.try_next().await {
+        let content_type = Field::content_type(&field);
+        if content_type.type_() == mime::IMAGE {
+            let filepath = uuid_filepath(content_type.subtype().as_str());
+
+            println!("multipart: {}", filepath);
+
+            let mut file = web::block(|| std::fs::File::create(filepath))
+                .await?;
+
+            while let Some(Ok(chunk)) = field.next().await {
+                file = web::block(move || file.write_all(&chunk).map(|_| file)).await?;
+            }
+
+        }
+    }
+
+    Ok(HttpResponse::Ok().into())
+}
+
 pub(crate) async fn json_handler(images: web::Json<Vec<Image>>) -> Result<HttpResponse> {
     let client = reqwest::Client::new();
     for image in images.0 {
@@ -81,6 +84,8 @@ pub(crate) async fn json_handler(images: web::Json<Vec<Image>>) -> Result<HttpRe
                     if resp_mime.type_() == mime::IMAGE {
                         let filepath = uuid_filepath(resp_mime.subtype().as_str());
 
+                        println!("url: {}", filepath);
+
                         let mut file = web::block(|| std::fs::File::create(filepath))
                             .await?;
 
@@ -88,6 +93,7 @@ pub(crate) async fn json_handler(images: web::Json<Vec<Image>>) -> Result<HttpRe
                         while let Some(Ok(chunk)) = image_stream.next().await {
                             file = web::block(move || file.write_all(&chunk).map(|_| file)).await?;
                         }
+
                     }
                 }
             }
@@ -95,6 +101,8 @@ pub(crate) async fn json_handler(images: web::Json<Vec<Image>>) -> Result<HttpRe
                 if let Some(data_url) = parse_data_url(&base64_str) {
                     if data_url.type_.type_() == mime::IMAGE {
                         let filepath = uuid_filepath(data_url.type_.subtype().as_str());
+
+                        println!("base64: {}", filepath);
 
                         let mut file = web::block(|| std::fs::File::create(filepath))
                             .await?;

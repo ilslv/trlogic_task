@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  trlogic_task:
+    build: .
+    ports:
+    - 8088:8088
+    volumes:
+    - images:/images
+
+volumes:
+  images:
