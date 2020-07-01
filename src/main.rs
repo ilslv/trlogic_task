@@ -1,17 +1,13 @@
 mod endpoints;
 
-use actix_web::{HttpServer, App, web, HttpResponse, guard, middleware};
+use actix_web::{HttpServer, App, web, guard, middleware, Result};
 use actix_web::guard::Guard;
 use actix_web::dev::RequestHead;
 use crate::endpoints::{multipart_handler, json_handler};
+use actix_files::NamedFile;
 
 pub(crate) const FULL_IMG_PATH: &str = "images/full/";
 pub(crate) const PREVIEW_IMG_PATH: &str = "images/preview/";
-
-async fn index() -> HttpResponse {
-    //TODO: static html
-    HttpResponse::Ok().body("index")
-}
 
 struct MultipartHeaderGuard {}
 
@@ -22,6 +18,10 @@ impl Guard for MultipartHeaderGuard {
         }
         false
     }
+}
+
+async fn index() -> Result<NamedFile> {
+    Ok(NamedFile::open("static/index.html")?)
 }
 
 #[actix_rt::main]
@@ -50,15 +50,18 @@ async fn main() -> std::io::Result<()> {
                     )
             )
             .service(
-                actix_files::Files::new("/images/full", FULL_IMG_PATH)
+                actix_files::Files::new("/img/full", FULL_IMG_PATH)
                     .show_files_listing()
             )
             .service(
-                actix_files::Files::new("/images/preview", PREVIEW_IMG_PATH)
+                actix_files::Files::new("/img/preview", PREVIEW_IMG_PATH)
                     .show_files_listing()
             )
+            .service(
+                actix_files::Files::new("/", "static")
+            )
     })
-        .bind("0.0.0.0:8088")?
+        .bind("0.0.0.0:8080")?
         .run()
         .await
 }

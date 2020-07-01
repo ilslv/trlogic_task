@@ -60,7 +60,6 @@ fn resize_image(file_mime: &str) -> Result<(), ImageError> {
 
 pub(crate) async fn multipart_handler(mut payload: Multipart) -> Result<HttpResponse> {
     let mut response = Vec::new();
-
     while let Ok(Some(mut field)) = payload.try_next().await {
         let content_type = (*Field::content_type(&field)).clone();
         if content_type.type_() == mime::IMAGE {
