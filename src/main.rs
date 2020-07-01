@@ -5,6 +5,9 @@ use actix_web::guard::Guard;
 use actix_web::dev::RequestHead;
 use crate::endpoints::{multipart_handler, json_handler};
 
+pub(crate) const FULL_IMG_PATH: &str = "images/full/";
+pub(crate) const PREVIEW_IMG_PATH: &str = "images/preview/";
+
 async fn index() -> HttpResponse {
     //TODO: static html
     HttpResponse::Ok().body("index")
@@ -25,7 +28,8 @@ impl Guard for MultipartHeaderGuard {
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_server=info,actix_web=info");
 
-    std::fs::create_dir_all("images").unwrap();
+    std::fs::create_dir_all(FULL_IMG_PATH).unwrap();
+    std::fs::create_dir_all(PREVIEW_IMG_PATH).unwrap();
 
     HttpServer::new(|| {
         App::new().wrap(middleware::Logger::default())
@@ -44,6 +48,14 @@ async fn main() -> std::io::Result<()> {
                             .guard(MultipartHeaderGuard {})
                             .to(multipart_handler)
                     )
+            )
+            .service(
+                actix_files::Files::new("/images/full", FULL_IMG_PATH)
+                    .show_files_listing()
+            )
+            .service(
+                actix_files::Files::new("/images/preview", PREVIEW_IMG_PATH)
+                    .show_files_listing()
             )
     })
         .bind("0.0.0.0:8088")?
