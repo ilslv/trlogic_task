@@ -18,8 +18,8 @@ pub(crate) enum Image {
 }
 
 struct DataURL {
-    type_: Mime,
-    data: Vec<u8>,
+    pub type_: Mime,
+    pub data: Vec<u8>,
 }
 
 fn parse_data_url(data_url: &str) -> Option<DataURL> {
@@ -155,4 +155,23 @@ pub(crate) async fn json_handler(images: web::Json<Vec<Image>>) -> Result<HttpRe
     }
 
     Ok(HttpResponse::Ok().json(response))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn unique_uuid() {
+        assert_ne!(uuid_filename(&mime::IMAGE_JPEG), uuid_filename(&mime::IMAGE_JPEG));
+    }
+
+    #[test]
+    fn parse_data_url_test() -> Result<(), String> {
+        let url = "data:image/jpeg;base64,somedata";
+        let data_url = parse_data_url(&url).ok_or("Parsing error!")?;
+        assert_eq!(data_url.type_, mime::IMAGE_JPEG);
+        assert_eq!(data_url.data, "somedata".as_bytes());
+        Ok(())
+    }
 }

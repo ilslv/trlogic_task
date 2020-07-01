@@ -58,7 +58,7 @@ async fn main() -> std::io::Result<()> {
                     .show_files_listing()
             )
             .service(
-                actix_files::Files::new("/", "static")
+                actix_files::Files::new("/", "static/")
             )
     })
         .bind("0.0.0.0:8080")?

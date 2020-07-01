@@ -14,5 +14,6 @@ RUN cargo build --release
 
 FROM gcr.io/distroless/cc-debian10
 COPY --from=build /code/trlogic_task/target/release/trlogic_task /
+COPY static /static
 EXPOSE 8080
 ENTRYPOINT [ "./trlogic_task" ]

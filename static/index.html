@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;900&display=swap" rel="stylesheet">
+    <title>TR Logic Task</title>
+</head>
+<body>
+    <div class="row">
+        <div class="column">
+            <h2>multipart/form-data</h2>
+            <form id='multipartForm' enctype='multipart/form-data' method='POST'>
+                <input type='file' name='fileUpload'>
+                <button id='addFileInput'>Add file input</button>
+                <input type='submit' value='Send files'>
+            </form>
+        </div>
+        <div class="column">
+            <h2>json</h2>
+            <form id="jsonForm" method="POST">
+                <div class="row">
+                    <button id="addURLInput">Add url input</button>
+                    <button id="addBase64Input">Add base64 input</button>
+                </div>
+                <input type="submit" value="Send JSON">
+            </form>
+        </div>
+    </div>
+    <script>
+        document.getElementById('addFileInput').addEventListener('click', (event) => {
+            event.preventDefault()
+            var input = document.createElement('input');
+            input.type = 'file';
+            input.name = 'fileUpload';
+            event.target.parentElement.insertBefore(input, event.target);
+        })
+
+        document.getElementById('multipartForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            let formData = new FormData(document.getElementById('multipartForm'));
+            const response = await fetch('/', {
+                method: 'POST',
+                body: formData,
+            });
+            alert(await response.text());
+        })
+
+        document.getElementById('addURLInput').addEventListener('click', (event) => {
+            event.preventDefault();
+            var input = document.createElement('input');
+            input.placeholder = 'url'
+            input.name = 'url';
+            event.target.parentElement.parentElement.insertBefore(input, event.target.parentElement);
+        });
+
+        document.getElementById('addBase64Input').addEventListener('click', (event) => {
+            event.preventDefault();
+            var input = document.createElement('input');
+            input.placeholder = 'base64'
+            input.name = 'base64';
+            event.target.parentElement.parentElement.insertBefore(input, event.target.parentElement);
+        });
+
+        document.getElementById('jsonForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            let formData = new FormData(document.getElementById('jsonForm'));
+            var object = [];
+            formData.forEach((value, key) => {
+                var entry = {};
+                entry[key] = value;
+                object.push(entry);
+            });
+            // alert(JSON.stringify(object));
+            const response = await fetch('/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(object),
+            });
+            alert(await response.text());
+        })
+    </script>
+</body>
+</html>

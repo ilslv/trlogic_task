@@ -1,0 +1,7 @@
+target
+images
+.git
+.idea
+Cargo.lock
+Dockerfile
+docker-compose.yml
