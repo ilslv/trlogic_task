@@ -1,4 +1,5 @@
 # TR Logic test task
+![Rust](https://github.com/ilslv/trlogic_task/workflows/Rust/badge.svg) \
 Simple webserver for uploading images written with [Actix Web]([https://actix.rs/](https://actix.rs/))
 ## Setup
 To run locally
