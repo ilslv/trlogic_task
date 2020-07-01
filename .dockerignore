@@ -5,3 +5,5 @@ images
 Cargo.lock
 Dockerfile
 docker-compose.yml
+README.md
+.github
