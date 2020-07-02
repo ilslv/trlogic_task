@@ -24,6 +24,6 @@ Add images | POST | localhost:8080 | JSON with urls or base64 images | JSON with
 ## Additional requirements
 - [x] Graceful shutdown
 - [x] Dockerfile and docker-compose.yml
-- [x]  Unit tests, CI (Github Actions)
+- [x]  Unit and integration tests, CI (Github Actions)
 - [ ] FFI for image processing
 
