@@ -160,6 +160,7 @@ pub(crate) async fn json_handler(images: web::Json<Vec<Image>>) -> Result<HttpRe
 #[cfg(test)]
 mod tests {
     use super::*;
+    use actix_web::{test, App};
 
     #[test]
     fn unique_uuid() {
@@ -173,5 +174,27 @@ mod tests {
         assert_eq!(data_url.type_, mime::IMAGE_JPEG);
         assert_eq!(data_url.data, "somedata".as_bytes());
         Ok(())
+    }
+
+    #[actix_rt::test]
+    async fn json_img_test() {
+        std::fs::create_dir_all(FULL_IMG_PATH).unwrap();
+        std::fs::create_dir_all(PREVIEW_IMG_PATH).unwrap();
+
+        let mut app = test::init_service(
+            App::new()
+                .route("/", web::post().to(json_handler))
+        ).await;
+
+        let req = test::TestRequest::post().set_json(
+            &vec![
+                Image::Url("http://raw.githubusercontent.com/ilslv/raytracing/master/render.png".into()),
+                Image::Base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAABmJLR0QA/wD/AP+gvaeTAAAAB3RJTUUH1ggDCwMADQ4NnwAAAFVJREFUGJWNkMEJADEIBEcbSDkXUnfSgnBVeZ8LSAjiwjyEQXSFEIcHGP9oAi+H0Bymgx9MhxbFdZE2a0s9kTZdw01ZhhYkABSwgmf1Z6r1SNyfFf4BZ+ZUExcNUQUAAAAASUVORK5CYII=".into()),
+            ]
+        ).to_request();
+
+        let resp: Vec<String> = test::read_response_json(&mut app, req).await;
+
+        assert_eq!(resp.len(), 2);
     }
 }
